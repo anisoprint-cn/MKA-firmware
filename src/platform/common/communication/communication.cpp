@@ -59,7 +59,9 @@ void Com::setBaudrate() {
 	#if (SERIAL_PORT_2 != -1)
 		  MKSERIAL2.setInterruptPriority(1);
 	#else
+		#ifndef PLATFORMIO_BUILD_WORKAROUND
 		  MKSERIAL2.disableInterrupts();
+		#endif
 	#endif
     serial_connect_timeout = millis() + 1000UL;
     while (!MKSERIAL2 && PENDING(millis(), serial_connect_timeout)) { /* nada */ }

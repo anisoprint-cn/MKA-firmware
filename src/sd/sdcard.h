@@ -63,9 +63,9 @@ class SDCard {
     char fileName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPTH+1],
          tempLongFilename[LONG_FILENAME_LENGTH+1],
           generatedBy[GENBY_SIZE];
-                
+
     PrintFileInfo fileInfo;
-    
+
     uint16_t fileModifiedDate;
     uint16_t fileModifiedTime;
 
@@ -309,7 +309,7 @@ class SDCard {
     bool findLayerHeight(char* buf, float &layerHeight);
     bool findFilamentNeed(char* buf, float &filament);
     bool findTotalHeight(char* buf, float &objectHeight);
-    
+
     void readFileInfo(SdFile &file);
     void clearFileInfo();
     bool findFileInfo(const char *buf, uint16_t buf_length);

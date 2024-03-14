@@ -10,8 +10,7 @@
 
 #if ENABLED(NEXTION_HMI)
 
-#include "StateFileinfo.h"
-
+#include "StateFileInfo.h"
 
 namespace {
 
