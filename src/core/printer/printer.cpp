@@ -201,28 +201,41 @@ void Printer::setup() {
   SERIAL_EMV(MSG_PLANNER_BUFFER_BYTES, (int)sizeof(block_t)*BLOCK_BUFFER_SIZE);
 
 
+  SERIAL_LM(ECHO, "HAL::spiBegin()");
 
   //configure hardware SPI
   HAL::spiBegin();
 
+  SERIAL_LM(ECHO, "print_job_counter.init()");
+
   print_job_counter.init();
 
+  SERIAL_LM(ECHO, "mechanics.init()");
+
   mechanics.init();
+
+  SERIAL_LM(ECHO, "endstops.init()");
 
   // Init endstops and pullups
   endstops.init();
 
   #if ENABLED(NEXTION_HMI)
+  SERIAL_LM(ECHO, "NextionHMI::Init()");
 	NextionHMI::Init();
   #endif
 
   // Load data from EEPROM if available (or use defaults)
   // This also updates variables in the planner, elsewhere
 
+  SERIAL_LM(ECHO, "eeprom.Load_Settings()");
+
   const bool sys_eeprom_loaded = eeprom.Load_Settings();
 
   #if HAS_SD_SUPPORT
+
+  SERIAL_LM(ECHO, "sdStorage.init()");
     sdStorage.init();
+  SERIAL_LM(ECHO, "sdStorage.mountAll()");
 	sdStorage.mountAll();
   #endif
 
@@ -233,11 +246,14 @@ void Printer::setup() {
     ZERO(mechanics.current_position);
   #endif
 
+  SERIAL_LM(ECHO, "mechanics.sync_plan_position_mech_specific()");
   // Vital to init stepper/planner equivalent for current_position
   mechanics.sync_plan_position_mech_specific();
 
+  SERIAL_LM(ECHO, "thermalManager.init()");
   thermalManager.init();  // Initialize temperature loop
 
+  SERIAL_LM(ECHO, "stepper.init()");
   stepper.init(); // Initialize stepper, this enables interrupts!
 
   #if MB(ALLIGATOR) || MB(ALLIGATOR_V3)
