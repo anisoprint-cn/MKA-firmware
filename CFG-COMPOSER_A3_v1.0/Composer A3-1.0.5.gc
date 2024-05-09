@@ -1,9 +1,9 @@
 ;SC12
 ;00000
-; Anisoprint Composer A3 version 1.0.4 system configuration
+; Anisoprint Composer A3 version 1.0.5 system configuration
 ; Firmware: MKA 1.1.0
-; 26.11.2020 - Andrey Azarov - Clone of 1.0.3
-; 26.11.2020 - Andrey Azarov - Updated SD card settings (MKA 1.1.0)
+; 09.05.2024 - Vladimir Antonov - Clone of 1.0.4
+; 09.05.2024 - Vladimir Antonov - Changed Z value for Max steps and feedrates (MKA 1.1.0)
 ;Stepper directions inversion
 M569 X0 Y1 Z1 E1 U1 V1
 ;Mechanics steps per unit:
