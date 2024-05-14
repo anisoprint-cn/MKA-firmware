@@ -65,7 +65,7 @@ namespace FlasherGUI
       try {
         var options = new Flasher.Options(
           PortsDropDown.SelectedKey,
-          "",
+          PrinterModelVersion.Text,
           FirmwareArchivePicker.FilePath,
           FlashMainCheckBox.Checked.Value,
           FlashLCDCheckBox.Checked.Value,
