@@ -22,7 +22,7 @@ namespace FlasherWinForms
       // passing true so that we can embed, otherwise we just get a reference to the control
       var nativeView = new FlasherPanel().ToNative(true);
       // set where we want it, size, dock attributes, etc.
-      nativeView.Location = new Point(100, 100);
+      nativeView.Location = new Point(0, 0);
       //nativeView.Dock = DockStyle.Fill;
 
       Controls.Add(nativeView);
