@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Project</StartAction>
+    <ExternalConsole>true</ExternalConsole>
+    <EnvironmentVariables>
+      <Variable name="DYLD_FALLBACK_LIBRARY_PATH" value="/usr/local/lib" />
+    </EnvironmentVariables>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GUI\FlasherGUI.csproj" />
+    <PackageReference Include="Eto.Forms" Version="2.8.3" />
+    <PackageReference Include="Eto.Platform.Gtk" Version="2.8.3" />
+  </ItemGroup>
+</Project>

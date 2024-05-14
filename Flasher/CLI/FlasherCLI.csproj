@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,13 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Flasher.cs" />
-    <Compile Include="Options.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Compile Include="FlasherCLI.cs" />
+    <ProjectReference Include="..\Flasher.csproj" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

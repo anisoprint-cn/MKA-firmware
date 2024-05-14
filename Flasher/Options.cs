@@ -6,7 +6,7 @@ namespace Flasher {
 
     public class Options
     {
-        [Option('p', "port", HelpText = "Serial port to use")]
+        [Option('p', "port", HelpText = "Serial port to use", Required = true)]
         public string Port { get; }
 
         [Option('d', "dev", HelpText = "DEVELOPER MODE: Printer model and version to be used")]
