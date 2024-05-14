@@ -19,7 +19,6 @@ namespace FlasherGtk
       var nativeWidget = new FlasherPanel().ToNative(true);
 
       Child = nativeWidget;
-      Child.DeleteEvent += OnDeleteEvent;
     }
 
     protected void OnDeleteEvent(object sender, DeleteEventArgs a)

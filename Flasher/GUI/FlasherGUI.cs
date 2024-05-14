@@ -102,7 +102,7 @@ namespace FlasherGUI
   /// <summary>
   /// Eto.Forms panel to embed in an existing WinForms app
   /// </summary>
-  public class FlasherPanel : Form
+  public class FlasherPanel : Panel
   {
     public static string Title = "Anisoprint Composer Flasher";
     public static int DefaultWidth = 800;
@@ -112,7 +112,6 @@ namespace FlasherGUI
 
     public FlasherPanel() {
       ClientSize = new Size(DefaultWidth, DefaultHeight);
-      AutoSize = true;
 
       _flashCommand = new FlashCommand();
 

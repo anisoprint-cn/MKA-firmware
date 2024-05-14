@@ -13,7 +13,7 @@ namespace FlasherGtk
       Application.Init();
       new Eto.Forms.Application(new Eto.GtkSharp.Platform()).Attach();
       MainWindow = new MainWindow();
-      MainWindow.Child.Show();
+      MainWindow.Show();
       Application.Run();
     }
   }
