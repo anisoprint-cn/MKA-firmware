@@ -8,8 +8,8 @@ using Eto.Drawing;
 
 namespace FlasherGUI
 {
-	public class FlashCommand : Command
-	{
+  public class FlashCommand : Command
+  {
     public FilePicker FirmwareArchivePicker { get; }
     public FilePicker ConfigOverridePicker { get; }
     public CheckBox FlashMainCheckBox { get; }
@@ -19,8 +19,8 @@ namespace FlasherGUI
     public DropDown PortsDropDown { get; }
     public TextBox PrinterModelVersion { get; }
 
-		public FlashCommand()
-		{
+    public FlashCommand()
+    {
       FirmwareArchivePicker = new FilePicker{ Title = "Select firmware archive" };
       FirmwareArchivePicker.FilePathChanged += (s, e) => {
         if (!string.IsNullOrEmpty(FirmwareArchivePicker.FilePath)) {
@@ -57,11 +57,11 @@ namespace FlasherGUI
       PortsDropDown = new DropDown{ DataStore = ports };
 
       PrinterModelVersion = new TextBox();
-		}
+    }
 
-		protected override void OnExecuted(EventArgs e)
-		{
-			base.OnExecuted(e);
+    protected override void OnExecuted(EventArgs e)
+    {
+      base.OnExecuted(e);
       try {
         var options = new Flasher.Options(
           PortsDropDown.SelectedKey,
@@ -80,7 +80,7 @@ namespace FlasherGUI
         MessageBox.Show(Application.Instance.MainForm, ex.Message, "Flashing FAILED", MessageBoxButtons.OK);
         return;
       }
-		}
+    }
 
     private void ListConfigFilesInArchive(string path) {
       var entries = new List<string>();
@@ -97,40 +97,40 @@ namespace FlasherGUI
       FlashMainCheckBox.Checked = true;
       UpdateConfigCheckBox.Checked = true;
     }
-	}
+  }
 
-	/// <summary>
-	/// Eto.Forms panel to embed in an existing WinForms app
-	/// </summary>
-	public class FlasherPanel : Form
-	{
-		public static string Title = "Anisoprint Composer Flasher";
+  /// <summary>
+  /// Eto.Forms panel to embed in an existing WinForms app
+  /// </summary>
+  public class FlasherPanel : Form
+  {
+    public static string Title = "Anisoprint Composer Flasher";
     public static int DefaultWidth = 800;
     public static int DefaultHeight = 250;
 
     private static FlashCommand _flashCommand;
 
-		public FlasherPanel() {
+    public FlasherPanel() {
       ClientSize = new Size(DefaultWidth, DefaultHeight);
       AutoSize = true;
 
       _flashCommand = new FlashCommand();
 
-			Content = new TableLayout {
-				Spacing = new Size(10, 10),
-				Rows = {
-					new TableRow(
+      Content = new TableLayout {
+        Spacing = new Size(10, 10),
+        Rows = {
+          new TableRow(
             new Label { Text = "COM port", VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Center },
             _flashCommand.PortsDropDown,
             null
           ),
-					new TableRow(
+          new TableRow(
             new Label { Text = "Firmware archive", VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Center },
             new TableCell(_flashCommand.FirmwareArchivePicker, true),
             _flashCommand.FlashMainCheckBox,
             null
           ),
-					new TableRow(
+          new TableRow(
             new Label { Text = "Config file override", VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Center },
             new TableCell(_flashCommand.ConfigOverridePicker, true),
             _flashCommand.FlashLCDCheckBox,
@@ -148,9 +148,9 @@ namespace FlasherGUI
             new Button { Text = "Flash!", Command = _flashCommand },
             null
           ),
-					null
-				}
-			};
-		}
-	}
+          null
+        }
+      };
+    }
+  }
 }
