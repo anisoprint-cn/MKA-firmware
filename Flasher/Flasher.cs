@@ -101,7 +101,7 @@ namespace Flasher
             //создание серийного порта
             sp = new SerialPort();
             sp.PortName = _options.Port;
-            sp.BaudRate = 115200;
+            sp.BaudRate = _options.BaudMain;
             sp.Encoding = Encoding.ASCII;
             sp.DtrEnable = true;
             sp.RtsEnable = true;
@@ -266,7 +266,7 @@ namespace Flasher
                         sp.Open();
                         Thread.Sleep(1000);
                         sp.Close();
-                        sp.BaudRate = 115200;
+                        sp.BaudRate = _options.BaudMain;
 
                         process.Start();
 
@@ -304,6 +304,12 @@ namespace Flasher
                     }
                     if (_options.FlashLCD) {
                         //экранная часть
+                        if (_options.BaudLCD != _options.BaudMain) {
+                            sp.Close();
+                            sp.BaudRate = _options.BaudLCD;
+                            sp.Open();
+                        }
+
                         Log.Information("Sending LCD firmware update command");
                         sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED].command);
 
