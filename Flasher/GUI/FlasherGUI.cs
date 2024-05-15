@@ -47,7 +47,6 @@ namespace FlasherGUI
     public CheckBox UpdateConfigCheckBox { get; }
     public DropDown ConfigsDropDown { get; }
     public DropDown PortsDropDown { get; }
-    public NumericStepper LCDBaudRate { get; }
     public TextBox PrinterModelVersion { get; }
     public TextArea FlasherLogs { get; }
 
@@ -87,8 +86,6 @@ namespace FlasherGUI
 
       var ports = SerialPort.GetPortNames();
       PortsDropDown = new DropDown{ DataStore = ports };
-
-      LCDBaudRate = new NumericStepper { Value = 1200, MinValue = 1200, MaxValue = 115200, DecimalPlaces = 0, Increment = 100 };
       PrinterModelVersion = new TextBox();
       FlasherLogs = new TextArea { ReadOnly = true, Width = 900, Height = 130 };
     }
@@ -115,8 +112,6 @@ namespace FlasherGUI
           UpdateConfigCheckBox.Checked.Value ? ConfigOverridePicker.FilePath : null,
           "Status:I",
           "Status:I",
-          115200,
-          (int)LCDBaudRate.Value,
           false
         );
         var flasher = new Flasher.Flasher(options);
@@ -177,8 +172,6 @@ namespace FlasherGUI
             new Label { Text = "Config file override", VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Center },
             new TableCell(_flashCommand.ConfigOverridePicker, true),
             _flashCommand.FlashLCDCheckBox,
-            new Label { Text = "LCD BAUD rate: ", VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Right  },
-            _flashCommand.LCDBaudRate,
             null
           ),
           new TableRow(

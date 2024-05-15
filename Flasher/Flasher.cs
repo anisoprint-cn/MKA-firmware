@@ -101,7 +101,7 @@ namespace Flasher
             //создание серийного порта
             sp = new SerialPort();
             sp.PortName = _options.Port;
-            sp.BaudRate = _options.BaudMain;
+            sp.BaudRate = 115200;
             sp.Encoding = Encoding.ASCII;
             sp.DtrEnable = true;
             sp.RtsEnable = true;
@@ -266,7 +266,7 @@ namespace Flasher
                         sp.Open();
                         Thread.Sleep(1000);
                         sp.Close();
-                        sp.BaudRate = _options.BaudMain;
+                        sp.BaudRate = 115200;
 
                         process.Start();
 
@@ -304,11 +304,6 @@ namespace Flasher
                     }
                     if (_options.FlashLCD) {
                         //экранная часть
-                        if (_options.BaudLCD != _options.BaudMain) {
-                            sp.Close();
-                            sp.BaudRate = _options.BaudLCD;
-                            sp.Open();
-                        }
 
                         Log.Information("Sending LCD firmware update command");
                         sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED].command);
@@ -473,7 +468,7 @@ namespace Flasher
                         if (code != FlasherCode.SUCCESS) {
                             return (code, msg);
                         }
-                        if (_options.PrinterConfig != null) {
+                        if (!string.IsNullOrEmpty(_options.PrinterConfig)) {
                             using (FileStream gc = File.OpenRead(_options.PrinterConfig))
                             {
                                 (code, msg) = updateConfig(gc);
@@ -481,9 +476,7 @@ namespace Flasher
                                     return (code, msg);
                                 }
                             }
-                        }
-                        else
-                        {
+                        } else if (!string.IsNullOrEmpty(printerFileNameTemplate)) {
                             var gc = z.GetEntry(printerFileNameTemplate+".gc");
                             using (var stream = gc.Open()) {
                                 (code, msg) = updateConfig(stream);
@@ -491,7 +484,7 @@ namespace Flasher
                                     return (code, msg);
                                 }
                             }
-                      }
+                        }
                     }
                 } else {
                     if (_options.FlashMain)

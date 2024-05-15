@@ -30,24 +30,18 @@ namespace Flasher {
         [Option("waitcfg", Default = "Status:I", HelpText = "Wait for specific line before config flashing")]
         public string WaitConfig { get; }
 
-        [Option("baudmain", Default = 115200, HelpText = "BAUD rate for main board flashing")]
-        public int BaudMain { get; }
-
-        [Option("baudlcd", Default = 1200, HelpText = "BAUD rate for LCD flashing")]
-        public int BaudLCD { get; }
-
         [Option('v', "verbose", HelpText = "Dump all the messages received via COM port")]
         public bool Verbose { get; }
 
         [Usage(ApplicationAlias = "flasher")]
         public static IEnumerable<Example> Examples =>
             new List<Example> {
-                new ("Flash the printer all-at-once, Main, then LCD then config. May be slow", new Options("COM12", "", "MKA_1.2.6_ComposerA3_v1.0.x_24-03-2022_2127.fw2", true, true, "", null, null, 115200, 1200, false)),
-                new ("Flash the printer all-at-once, Main and config, no LCD", new Options("COM12", "", "MKA_1.2.6_ComposerA3_v1.0.x_24-03-2022_2127.fw2", true, false, "", null, null, 115200, 1200, false)),
-                new ("Flash the the .gc config only, developer mode, verbose COM", new Options("COM12", "ComposerA3 v1.0.3", "", false, false, "Composer_A3-1.0.3.gc", null, null, 115200, 1200, true)),
+                new ("Flash the printer all-at-once, Main, then LCD then config. May be slow", new Options("COM12", "", "MKA_1.2.6_ComposerA3_v1.0.x_24-03-2022_2127.fw2", true, true, "", null, null, false)),
+                new ("Flash the printer all-at-once, Main and config, no LCD", new Options("COM12", "", "MKA_1.2.6_ComposerA3_v1.0.x_24-03-2022_2127.fw2", true, false, "", null, null, false)),
+                new ("Flash the the .gc config only, developer mode, verbose COM", new Options("COM12", "ComposerA3 v1.0.3", "", false, false, "Composer_A3-1.0.3.gc", null, null, true)),
             };
 
-        public Options(string port, string printerModelVersion, string inputFileName, bool flashMain, bool flashLCD, string printerConfig, string waitLCD, string waitConfig, int baudMain, int baudLcd, bool verbose)
+        public Options(string port, string printerModelVersion, string inputFileName, bool flashMain, bool flashLCD, string printerConfig, string waitLCD, string waitConfig, bool verbose)
         {
             Port = port;
             PrinterModelVersion = printerModelVersion;
@@ -57,8 +51,6 @@ namespace Flasher {
             PrinterConfig = printerConfig;
             WaitLCD = waitLCD;
             WaitConfig = waitConfig;
-            BaudMain = baudMain;
-            BaudLCD = baudLcd;
             Verbose = verbose;
         }
     }
