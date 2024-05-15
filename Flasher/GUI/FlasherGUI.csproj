@@ -10,6 +10,7 @@
     <Compile Include="FlasherGUI.cs" />
     <ProjectReference Include="..\Flasher.csproj" />
     <PackageReference Include="Eto.Forms" Version="2.8.3" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
 </Project>

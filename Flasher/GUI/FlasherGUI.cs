@@ -5,9 +5,39 @@ using System.IO.Compression;
 using System.IO.Ports;
 using Eto.Forms;
 using Eto.Drawing;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+using Serilog.Configuration;
 
 namespace FlasherGUI
 {
+  public class TextAreaSink : ILogEventSink
+  {
+    private TextArea _textArea;
+    private readonly IFormatProvider _formatProvider;
+
+    public TextAreaSink(TextArea textArea, IFormatProvider formatProvider)
+    {
+      _textArea = textArea;
+      _formatProvider = formatProvider;
+    }
+
+    public void Emit(LogEvent logEvent)
+    {
+      var message = logEvent.RenderMessage(_formatProvider);
+      _textArea.Append(DateTimeOffset.Now.ToString() + " "  + message, true);
+    }
+  }
+
+  public static class TextAreaSinkExtensions
+  {
+    public static LoggerConfiguration TextAreaSink(this LoggerSinkConfiguration loggerConfiguration, TextArea textArea, IFormatProvider formatProvider = null)
+    {
+      return loggerConfiguration.Sink(new TextAreaSink(textArea, formatProvider));
+    }
+  }
+
   public class FlashCommand : Command
   {
     public FilePicker FirmwareArchivePicker { get; }
@@ -18,6 +48,7 @@ namespace FlasherGUI
     public DropDown ConfigsDropDown { get; }
     public DropDown PortsDropDown { get; }
     public TextBox PrinterModelVersion { get; }
+    public TextArea FlasherLogs { get; }
 
     public FlashCommand()
     {
@@ -57,12 +88,22 @@ namespace FlasherGUI
       PortsDropDown = new DropDown{ DataStore = ports };
 
       PrinterModelVersion = new TextBox();
+      FlasherLogs = new TextArea { ReadOnly = true, Width = 800 };
     }
 
     protected override void OnExecuted(EventArgs e)
     {
       base.OnExecuted(e);
       try {
+        var messages = new Queue<string>();
+
+        Log.Logger = new LoggerConfiguration()
+          .MinimumLevel.Information()
+          .WriteTo.TextAreaSink(FlasherLogs)
+          .CreateLogger();
+
+        Log.Information($"Flashing {PrinterModelVersion.Text} on {PortsDropDown.SelectedKey}");
+
         var options = new Flasher.Options(
           PortsDropDown.SelectedKey,
           PrinterModelVersion.Text,
@@ -111,13 +152,11 @@ namespace FlasherGUI
     private static FlashCommand _flashCommand;
 
     public FlasherPanel() {
-      ClientSize = new Size(DefaultWidth, DefaultHeight);
-
       _flashCommand = new FlashCommand();
 
-      Content = new TableLayout {
-        Spacing = new Size(10, 10),
-        Rows = {
+      Content = new StackLayout(
+        new StackLayoutItem("Flash"),
+        new StackLayoutItem(new TableLayout(
           new TableRow(
             new Label { Text = "COM port", VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Center },
             _flashCommand.PortsDropDown,
@@ -148,8 +187,10 @@ namespace FlasherGUI
             null
           ),
           null
-        }
-      };
+        )),
+        new StackLayoutItem("Log"),
+        new StackLayoutItem(_flashCommand.FlasherLogs, HorizontalAlignment.Left, true)
+      );
     }
   }
 }

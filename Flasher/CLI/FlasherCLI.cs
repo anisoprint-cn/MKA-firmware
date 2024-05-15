@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using System.Runtime;
 using Environment = System.Environment;
+using Serilog;
 
 namespace FlasherCLI
 {
@@ -17,6 +18,10 @@ namespace FlasherCLI
 
         static void Process(Flasher.Options options)
         {
+            Log.Logger = new LoggerConfiguration()
+              .WriteTo.Console()
+              .CreateLogger();
+
             var flasher = new Flasher.Flasher(options);
             var result = flasher.Flash();
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Timer = System.Timers.Timer;
+using Serilog;
 
 namespace Flasher
 {
@@ -107,11 +108,11 @@ namespace Flasher
 
             try
             {
-                Console.WriteLine($"Opening serial port {sp.PortName}");
+                Log.Information($"Opening serial port {sp.PortName}");
                 sp.Open();
             } catch (Exception e)
             {
-                Console.WriteLine($"Failed to open serial port {sp.PortName}: {e.Message}");
+                Log.Information($"Failed to open serial port {sp.PortName}: {e.Message}");
                 //если есть ошибка, то возвращаем и ее текст
                 return (FlasherCode.UNKNOWN_ERROR, e.Message);
             }
@@ -126,17 +127,17 @@ namespace Flasher
                 (string value, List<string> allStrs, bool hasError) configCRC = ("", new List<string>(), false);
                 if (!devMode)
                 {
-                    Console.WriteLine("Gathering printer info");
+                    Log.Information("Gathering printer info");
                     Thread.Sleep(1000);
                     sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED].command);
-                    Console.WriteLine("Printer firmware update started");
+                    Log.Information("Printer firmware update started");
                     Thread.Sleep(1000);
                     //~ sp.WriteLine("Sending PRINTER_FIRWARE_UPDATE_STARTED command");
-                    Console.WriteLine(nameof(FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED));
+                    Log.Information(nameof(FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED));
 
                     //ждем 60 секунд, пока принтер накатается
                     sp.DiscardInBuffer();
-                    Console.WriteLine("Waiting for 'wait' line");
+                    Log.Information("Waiting for 'wait' line");
                     var res = WaitFor(sp, "wait", 60);
                     if (!res.ok)
                     {
@@ -144,17 +145,17 @@ namespace Flasher
                         return (FlasherCode.PRINTER_NOT_READY, "");
                     }
 
-                    Console.WriteLine("Printer is ready");
+                    Log.Information("Printer is ready");
                     UpdateStatus(FlasherStatus.PRINTER_READY);
 
                     Thread.Sleep(5000);
 
                     sp.DiscardInBuffer();
-                    Console.WriteLine("Getting machine version");
+                    Log.Information("Getting machine version");
                     sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.GET_PRINTER_VERSION].command);
 
                     machineVersion = GetChars(sp, 60, _commandAndAnswerPatterns[FlasherCommands.GET_PRINTER_VERSION].pattern);
-                    Console.WriteLine($"Received version: {machineVersion.value}");
+                    Log.Information($"Received version: {machineVersion.value}");
 
                     if (machineVersion.hasError)
                     {
@@ -164,11 +165,11 @@ namespace Flasher
                     if (machineVersion.value.Count(a => a.Equals('.')) == 1) machineVersion.value += ".0";
 
                     sp.DiscardInBuffer();
-                    Console.WriteLine("Getting machine name");
+                    Log.Information("Getting machine name");
                     sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.GET_PRINTER_MACHINE_NAME].command);
 
                     machineName = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.GET_PRINTER_MACHINE_NAME].pattern);
-                    Console.WriteLine($"Received name: {machineName.value}");
+                    Log.Information($"Received name: {machineName.value}");
 
                     if (machineName.hasError)
                     {
@@ -177,23 +178,23 @@ namespace Flasher
                     }
 
                     sp.DiscardInBuffer();
-                    Console.WriteLine("Getting machine system config version");
+                    Log.Information("Getting machine system config version");
                     sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.SYSTEM_CONFIG_VERSION].command);
 
                     configVersionFromMachine = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.SYSTEM_CONFIG_VERSION].pattern);
-                    Console.WriteLine($"Received config version: {configVersionFromMachine.value}");
+                    Log.Information($"Received config version: {configVersionFromMachine.value}");
 
                     sp.DiscardInBuffer();
-                    Console.WriteLine("Getting machine system config CRC");
+                    Log.Information("Getting machine system config CRC");
                     sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.SYSTEM_CONFIG_CRC].command);
 
                     configCRC = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.SYSTEM_CONFIG_CRC].pattern);
-                    Console.WriteLine($"Received config CRC: {configCRC.value}");
+                    Log.Information($"Received config CRC: {configCRC.value}");
                 }
                 else
                 {
-                    Console.WriteLine("Using developer mode!");
-                    Console.WriteLine("Skipping printer readiness checks");
+                    Log.Information("Using developer mode!");
+                    Log.Information("Skipping printer readiness checks");
                     UpdateStatus(FlasherStatus.PRINTER_READY);
                     UpdateStatus(FlasherStatus.PRINTER_MODEL_VERIFIED);
                 }
@@ -221,14 +222,14 @@ namespace Flasher
                         }
                         else
                         {
-                            Console.WriteLine("Printer model is verified, config is available");
+                            Log.Information("Printer model is verified, config is available");
                             UpdateStatus(FlasherStatus.PRINTER_MODEL_VERIFIED);
                         }
                     }
                     else
                     {
                         // TODO: Check if input has the corresponding config if no override is present
-                        Console.WriteLine("Skipping printer model verification");
+                        Log.Information("Skipping printer model verification");
                         UpdateStatus(FlasherStatus.PRINTER_MODEL_VERIFIED);
                     }
 
@@ -245,7 +246,7 @@ namespace Flasher
                         var tempBoardName = Path.Combine(tempDirectory, _firmwareFileName);
                         boardFirmware.ExtractToFile(tempBoardName);
 
-                        Console.WriteLine("Starting MCU firmware update");
+                        Log.Information("Starting MCU firmware update");
                         //команда того, что наичнается прошивка принтера
                         sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED].command);
 
@@ -276,7 +277,7 @@ namespace Flasher
 
                         var bossacLog = process.StandardOutput.ReadToEnd();
                         var bossacErrors = process.StandardError.ReadToEnd();
-                        Console.WriteLine($"Bossac log:\n{bossacLog}");
+                        Log.Information($"Bossac log:\n{bossacLog}");
 
                         var exitCode = process.ExitCode;
                         process.Close();
@@ -289,24 +290,24 @@ namespace Flasher
                                 LoggingError("Firmware verification failed", new List<string>() { bossacErrors });
                                 return (FlasherCode.FIRMWARE_NOT_VERIFIED, "");
                             case 0:
-                                Console.WriteLine("Firmware successfully uploaded and verified");
+                                Log.Information("Firmware successfully uploaded and verified");
                                 UpdateStatus(FlasherStatus.FIRMWARE_VERIFIED);
                                 break;
                         }
 
                         Thread.Sleep(2000);
 
-                        Console.WriteLine("Reconnecting with the machine");
+                        Log.Information("Reconnecting with the machine");
                         sp.Open();
 
                         Thread.Sleep(1000);
                     }
                     if (_options.FlashLCD) {
                         //экранная часть
-                        Console.WriteLine("Sending LCD firmware update command");
+                        Log.Information("Sending LCD firmware update command");
                         sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.PRINTER_FIRWARE_UPDATE_STARTED].command);
 
-                        Console.WriteLine($"Waiting for '{_options.WaitLCD}' line");
+                        Log.Information($"Waiting for '{_options.WaitLCD}' line");
                         var res = WaitFor(sp, _options.WaitLCD, 60);
                         if (!res.ok)
                         {
@@ -329,21 +330,21 @@ namespace Flasher
 
                         //сообщение что начинается прошивка экрана
                         sp.DiscardInBuffer();
-                        Console.WriteLine("Starting display firmware update");
+                        Log.Information("Starting display firmware update");
                         sp.WriteLine($"{_commandAndAnswerPatterns[FlasherCommands.DISPLAY_FIRMWARE_UPDATE_STARTED].command} S{fileBytes.Length}");
 
                         var ok = GetChars(sp, 20, _commandAndAnswerPatterns[FlasherCommands.DISPLAY_FIRMWARE_UPDATE_STARTED].pattern);
-                        Console.WriteLine($"Received: '{ok.value}'");
+                        Log.Information($"Received: '{ok.value}'");
                         if (ok.hasError || !ok.value.Equals("ok"))
                         {
                             for (var i = 0; i < 4; i++)
                             {
                                 sp.DiscardInBuffer();
-                                Console.WriteLine($"Trying to start display firmware update again - repeat {i}");
+                                Log.Information($"Trying to start display firmware update again - repeat {i}");
                                 sp.WriteLine($"{_commandAndAnswerPatterns[FlasherCommands.DISPLAY_FIRMWARE_UPDATE_STARTED].command} S{fileBytes.Length}");
 
                                 ok = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.DISPLAY_FIRMWARE_UPDATE_STARTED].pattern);
-                                Console.WriteLine($"Received: '{ok.value}'");
+                                Log.Information($"Received: '{ok.value}'");
                                 if (!ok.hasError && ok.value.Equals("ok")) break;
                             }
 
@@ -355,7 +356,7 @@ namespace Flasher
                         }
 
                         sp.DiscardInBuffer();
-                        Console.WriteLine("Machine is ready for display firmware update");
+                        Log.Information("Machine is ready for display firmware update");
                         UpdateStatus(FlasherStatus.DISPLAY_READY);
 
                         //передаем прошивку экрана пакетами по 128 байт
@@ -370,7 +371,7 @@ namespace Flasher
                                 if (resChars.hasError || !resChars.value.Equals("ok"))
                                 {
                                     LoggingError("Error during display firmware update", resChars.allStrs);
-                                    Console.WriteLine($"Sent {count} bytes out of {fileBytes.Length}");
+                                    Log.Information($"Sent {count} bytes out of {fileBytes.Length}");
                                     return (FlasherCode.DISPLAY_FIRMWARING_ERROR, "");
                                 }
                                 packetPos = 0;
@@ -385,7 +386,7 @@ namespace Flasher
                         {
                             sp.Write(packet, 0, packetPos);
                             ok = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.DISPLAY_FIRMWARING].pattern);
-                            Console.WriteLine($"Received: '{ok.value}'");
+                            Log.Information($"Received: '{ok.value}'");
                             if (ok.hasError || !ok.value.Equals("ok"))
                             {
                                 LoggingError("Error during last packet on display firmware update", ok.allStrs);
@@ -394,13 +395,13 @@ namespace Flasher
                         }
 
                         UpdateStatus(FlasherStatus.DISPLAY_UPDATED);
-                        Console.WriteLine($"Display update finished");
+                        Log.Information($"Display update finished");
                     }
                     return (FlasherCode.SUCCESS, "");
                 };
                 var updateConfig = (Stream gc) => {
                     if (!string.IsNullOrEmpty(_options.WaitConfig)) {
-                        Console.WriteLine($"Waiting for '{_options.WaitConfig}' line");
+                        Log.Information($"Waiting for '{_options.WaitConfig}' line");
                         var res = WaitFor(sp, _options.WaitConfig, 60);
                         if (!res.ok)
                         {
@@ -421,18 +422,18 @@ namespace Flasher
 
                     if (configVersionFromFile != configVersionFromMachine.value || configCRCFromFile != configCRC.value)
                     {
-                        Console.WriteLine($"Config update needed, starting config update");
+                        Log.Information($"Config update needed, starting config update");
                         while (!streamReader.EndOfStream)
                         {
                             var str = streamReader.ReadLine();
                             if (str != null && str.Any() && str[0] != ';')
                             {
                                 sp.DiscardInBuffer();
-                                Console.WriteLine($"Sending:{str}");
+                                Log.Information($"Sending:{str}");
                                 sp.WriteLine(str);
 
                                 var (value, allStrs, hasError) = GetChars(sp, 10, "ok");
-                                Console.WriteLine($"Received:{value}");
+                                Log.Information($"Received:{value}");
                                 if (hasError)
                                 {
                                     LoggingError("Error while config update", allStrs);
@@ -442,11 +443,11 @@ namespace Flasher
                         }
 
                         sp.DiscardInBuffer();
-                        Console.WriteLine("Saving config to EEPROM");
+                        Log.Information("Saving config to EEPROM");
                         sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.EEPROM_WRITING].command);
 
                         var ok = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.EEPROM_WRITING].pattern);
-                        Console.WriteLine($"Received:{ok.value}");
+                        Log.Information($"Received:{ok.value}");
                         if (ok.hasError || !ok.value.Equals("ok"))
                         {
                             LoggingError("Error while saving config to EEPROM", ok.allStrs);
@@ -513,11 +514,11 @@ namespace Flasher
                 {
                     var trueVersion = _options.PrinterModelVersion.Split('-').Last();
                     sp.DiscardInBuffer();
-                    Console.WriteLine("Saving printer version to EEPROM");
+                    Log.Information("Saving printer version to EEPROM");
                     sp.WriteLine(_commandAndAnswerPatterns[FlasherCommands.SAVE_PRINTER_VERSION_TO_EEPROM].command+" "+trueVersion);
 
                     var ok = GetChars(sp, 10, _commandAndAnswerPatterns[FlasherCommands.SAVE_PRINTER_VERSION_TO_EEPROM].pattern);
-                    Console.WriteLine($"Received:{ok.value}");
+                    Log.Information($"Received:{ok.value}");
                     if (ok.hasError || !ok.value.Equals("ok"))
                     {
                         LoggingError("Error saving printer version to EEPROM", ok.allStrs);
@@ -526,20 +527,20 @@ namespace Flasher
                 }
 
                 UpdateStatus(FlasherStatus.EEPROM_UPDATED);
-                Console.WriteLine("Printer configuration updated");
-                Console.WriteLine("Rebooting printer");
+                Log.Information("Printer configuration updated");
+                Log.Information("Rebooting printer");
                 //небольшой лайфхак для перезапуска серийного порта
                 sp.Close();
                 Thread.Sleep(1000);
                 sp.Open();
                 Thread.Sleep(1000);
                 sp.Close();
-                Console.WriteLine("Firmware update successfully finished");
+                Log.Information("Firmware update successfully finished");
                 return (FlasherCode.SUCCESS, "");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Exception: {e.Message}");
+                Log.Information($"Exception: {e.Message}");
                 //если есть ошибка, то возвращаем и ее текст
                 return (FlasherCode.UNKNOWN_ERROR, e.Message);
             }
@@ -555,8 +556,8 @@ namespace Flasher
 
         private void LoggingError(string message, List<string> allStrs)
         {
-            Console.WriteLine($"{message}\n{string.Join("", allStrs)}");
-            Console.WriteLine("--------------------------------------");
+            Log.Information($"{message}\n{string.Join("", allStrs)}");
+            Log.Information("--------------------------------------");
         }
 
         private void UpdateStatus(FlasherStatus code)
@@ -586,7 +587,7 @@ namespace Flasher
                     {
                         var rawString = new string(chars.ToArray()).TrimEnd('\r', '\n');
                         if (_options.Verbose) {
-                            Console.WriteLine($"GET >> {rawString}");
+                            Log.Information($"GET >> {rawString}");
                         }
                         allstrs.Add(rawString);
                         if (rawString.StartsWith(pattern))
@@ -627,7 +628,7 @@ namespace Flasher
                     {
                         var strIn = new string(chars.ToArray()).TrimEnd('\r', '\n');
                         if (_options.Verbose) {
-                            Console.WriteLine($"WAIT >> {strIn}");
+                            Log.Information($"WAIT >> {strIn}");
                         }
                         strings.Add(strIn);
                         if (wait.Equals(strIn))
