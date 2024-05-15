@@ -26,7 +26,7 @@ namespace FlasherGUI
     public void Emit(LogEvent logEvent)
     {
       var message = logEvent.RenderMessage(_formatProvider);
-      _textArea.Append(DateTimeOffset.Now.ToString() + " "  + message, true);
+      _textArea.Append(DateTimeOffset.Now.ToString() + " "  + message + "\r\n", true);
     }
   }
 
@@ -90,7 +90,7 @@ namespace FlasherGUI
 
       LCDBaudRate = new NumericStepper { Value = 1200, MinValue = 1200, MaxValue = 115200, DecimalPlaces = 0, Increment = 100 };
       PrinterModelVersion = new TextBox();
-      FlasherLogs = new TextArea { ReadOnly = true, Width = 800 };
+      FlasherLogs = new TextArea { ReadOnly = true, Width = 900, Height = 130 };
     }
 
     protected override void OnExecuted(EventArgs e)
@@ -121,6 +121,7 @@ namespace FlasherGUI
         );
         var flasher = new Flasher.Flasher(options);
         var result = flasher.Flash();
+        MessageBox.Show(Application.Instance.MainForm, $"Flashed: {result}", "Flashing DONE", MessageBoxButtons.OK);
       } catch (Exception ex) {
         MessageBox.Show(Application.Instance.MainForm, ex.Message, "Flashing FAILED", MessageBoxButtons.OK);
         return;
