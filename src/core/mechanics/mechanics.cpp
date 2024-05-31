@@ -60,7 +60,7 @@ int16_t Mechanics::feedrate_percentage       = 100;
 
 const float Mechanics::homing_feedrate_mm_s[XYZ] = { MMM_TO_MMS(HOMING_FEEDRATE_X), MMM_TO_MMS(HOMING_FEEDRATE_Y), MMM_TO_MMS(HOMING_FEEDRATE_Z) },
             Mechanics::home_bump_mm[XYZ]         = { X_HOME_BUMP_MM, Y_HOME_BUMP_MM, Z_HOME_BUMP_MM };
-   
+
 uint32_t  Mechanics::max_acceleration_steps_per_s2[XYZE_N] = { 0 },
           Mechanics::max_acceleration_mm_per_s2[XYZE_N]    = { 0 };
 
@@ -231,7 +231,7 @@ void Mechanics::do_blocking_move_to(const float rx, const float ry, const float 
   const float old_feedrate_mm_s = feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (printer.debugLeveling()) print_xyz(PSTR(">>> do_blocking_move_to"), NULL, rx, ry, rz);
+    //~ if (printer.debugLeveling()) print_xyz(PSTR(">>> do_blocking_move_to"), NULL, rx, ry, rz);
   #endif
 
   const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate_mm_s[Z_AXIS];

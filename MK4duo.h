@@ -267,4 +267,8 @@ typedef int8_t    pin_t;
   #endif
 #endif
 
+#if ENABLED(DEBUG_LEVELING_FEATURE)
+  #include <src/platform/common/debug/debug.h>
+#endif
+
 #endif /* _MK4DUO_H_ */
